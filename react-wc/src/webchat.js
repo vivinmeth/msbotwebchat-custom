@@ -102,12 +102,48 @@ const attachmentMiddleware = () => next => card => {
 
     }
     else if(card.attachment.contentType === 'text/markdown' || card.attachment.contentType === 'text/plain'){
-        const emoji = emojiCard(getEmoji(card.attachment.content));
-        console.log('text render, emoji ->', emoji);
-        if (emoji){
+        let emoji = emojiCard(getEmoji(card.attachment.content));
+        if(!emoji){
+
+            const emoji = renderEmoji(card.attachment.content);
+            console.log('text render, emoji ->', emoji);
+            if (emoji){
+                return (
+                    <div style={{'padding': '5px'}}>
+                        <p>CPI Emoji Render!</p>
+                        <hr/>
+                        <div style={{
+                            display: 'flex',
+                            'alignItems': 'center',
+                            'flex-wrap': 'wrap',
+                            // 'gridAutoFlow': 'column',
+                            'grid-template-columns': 'repeat(auto-fit, minmax(max-content, 225px))',
+                            'grid-template-rows': 'repeat(auto-fit, minmax(27px, max-content))',
+                            // grid-auto-flow: column;
+                        }}>
+                            {emoji}
+                        </div>
+
+                    </div>
+                )
+            }
+        } else{
             return (
-                <div>
-                    <p> CPI Emoji: {emoji}</p>
+                <div style={{'padding': '5px'}}>
+                    <p>CPI Emoji Render!</p>
+                    <hr/>
+                    <div style={{
+                        display: 'flex',
+                        'alignItems': 'center',
+                        'flex-wrap': 'wrap',
+                        // 'gridAutoFlow': 'column',
+                        'grid-template-columns': 'repeat(auto-fit, minmax(max-content, 225px))',
+                        'grid-template-rows': 'repeat(auto-fit, minmax(27px, max-content))',
+
+                    }}>
+                        {emoji}
+                    </div>
+
                 </div>
             )
         }
@@ -116,14 +152,85 @@ const attachmentMiddleware = () => next => card => {
 };
 
 const renderEmoji = (textBlock) => {
+    let possibleCMDs = stringPatterns(textBlock, /\(+[a-z]+\)/);
+    if (possibleCMDs.length === 0){
+        return null;
+    }
+    else{
+        console.log('============ render emoji start ============');
+        let finalText = [];
+        for (const cmd of possibleCMDs){
+            if(possibleCMDs.indexOf(cmd) === 0){
+                let text = textBlock.slice(0, cmd[1][0]);
+                text.split(' ').map( text => {
+                    finalText.push(text);
+                });
+            }
+            else{
+                let text = textBlock.slice(possibleCMDs[possibleCMDs.indexOf(cmd) - 1][1][1], cmd[1][0]);
+                text.split(' ').map( text => {
+                    finalText.push(text);
+                });
+                // finalText.push(textBlock.slice(possibleCMDs[possibleCMDs.indexOf(cmd) - 1][1][1], cmd[1][0]));
+            }
+            finalText.push(cmd[0]);
+            if(possibleCMDs.indexOf(cmd) === (possibleCMDs.length -1)){
+                if(cmd[1][1] < textBlock.length){
+                    let text = textBlock.slice(cmd[1][1], textBlock.length);
+                    text.split(' ').map( text => {
+                        finalText.push(text);
+                    });
+                    // finalText.push(textBlock.slice(cmd[1][1], textBlock.length));
+                }
+            }
+            console.log('emoji cmd', cmd[0], cmd[1], textBlock.slice(cmd[1][0], cmd[1][1]), textBlock);
+        }
+        console.log('============ render emoji done ============');
 
+        console.log('finalText', finalText);
+        let finalRender = (
+
+                finalText.map((text, index) => {
+                    const emoji = emojiCard(getEmoji(text), '25px');
+                    console.log('emoji is ->', emoji);
+                    if (emoji){
+                        return (<span key={index} style={{'width': 'fit-content', 'white-space': 'nowrap'}}>{emoji}</span>);
+                    }
+                    return (<span key={index} style={{'width': 'fit-content', 'white-space': 'nowrap'}}>&nbsp;{text}&nbsp;</span>);
+                })
+
+        )
+        console.log(finalRender);
+        console.log('============ final render emoji done ============');
+        return finalRender;
+    };
 };
 
-const emojiCard = (emojiResponse) => {
+const stringPatterns = (textBlock, regEx) => {
+  let match, indexes= [];
+  let text = textBlock;
+  let i = 0;
+  do {
+      i = (indexes.length - 1);
+      match= regEx.exec(text);
+      if(match){
+          console.log(indexes, i , indexes[i])
+          const correction = indexes[i]? indexes[i][1][0] + 1 : 0;
+          indexes.push([`${match[0]}`, [match.index+correction, match.index+match[0].length+correction]]);
+          text = text.substring(text.indexOf(match[0]) + 1);
+          console.log(match, indexes, text);
+      }
+
+  }while(match);
+  console.log('indexes -> ',indexes);
+  return indexes;
+};
+
+const emojiCard = (emojiResponse, size='60px') => {
     let emojiRender;
     if(emojiResponse.isEmoji){
         emojiRender = (
-            <div style={{'width': '60px', 'height': '60px', 'backgroundColor': 'white'}}>
+            <div style={{'width': size, 'height': size, 'backgroundColor': 'white'}}>
                 <img src={emojiResponse.emoji} alt={emojiResponse.cmd} style={{'width': '100%', 'height': '100%'}}></img>
             </div>
         )
