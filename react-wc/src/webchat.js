@@ -1,9 +1,25 @@
 import React, { useMemo, Component } from 'react';
-import ReactWebChat, { createDirectLine, createStore} from 'botframework-webchat';
-import {hooks} from 'botframework-webchat-component';
+import ReactWebChat, { createDirectLine, createStore, hooks} from 'botframework-webchat';
+import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
+import {Components} from 'botframework-webchat-component';
+import like from './assets/img/emojis/like-100px.gif';
+import devil from './assets/img/emojis/devil-100px.gif';
+import grinning from './assets/img/emojis/grinning-100px.gif';
+import hi from './assets/img/emojis/hi-40px.gif';
+import monkey from './assets/img/emojis/monkey-100px.gif';
+import sad from './assets/img/emojis/sad-100px.gif';
+import smile from './assets/img/emojis/smile-special.gif';
+import tongue_out from './assets/img/emojis/tongue-out-100px.gif';
+
+
+import PlainWebChat from './PlainWebChat';
+
+import * as AdaptiveCards from 'adaptivecards';
+
 export let currentCard;
 
-let {useCreateActivityRenderer, useCreateAttachmentRenderer } = hooks;
+let {useCreateActivityRenderer, useRenderAttachment, useAdaptiveCardsPackage } = hooks;
+
 
 const store = createStore({}, ({ dispatch }) => next => action => {
     if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
@@ -43,13 +59,98 @@ export default (props) => {
             adaptiveCardsHostConfig={adaptiveCardsHostConfig}
             userID="YOUR_USER_ID"
         />
+        // <React.Fragment>
+        //     <h1>Web Chat with plain UI</h1>
+        //     <hr />
+        //     {!!directLine && (
+        //         <Components.Composer directLine={directLine}>
+        //             <PlainWebChat />
+        //         </Components.Composer>
+        //     )}
+        // </React.Fragment>
         );
 };
 
 const attachmentMiddleware = () => next => card => {
     console.log('attachmentMiddleware ->', card);
+    if(card.attachment.contentType === 'application/vnd.microsoft.card.adaptive'){
+        if(card.attachment.content.cpi){
+            // card.attachment.content.body[1].style = {
+            //     color:'red'
+            // }
+
+            const cpiConfig = card.attachment.content.cpi;
+            if(cpiConfig.enabled){
+                let cardRender;
+                if(cpiConfig.cardType === 'emoji'){
+                    cardRender = emojiCard(getEmoji(card.attachment.content.emoji));
+                    if (cardRender){
+                        return (
+                            <div>
+                                {cardRender}
+                            </div>
+                        )
+                    }
+                }
+
+
+
+            }
+
+
+        }
+
+    }
+    else if(card.attachment.contentType === 'text/markdown' || card.attachment.contentType === 'text/plain'){
+        const emoji = emojiCard(getEmoji(card.attachment.content));
+        console.log('text render, emoji ->', emoji);
+        if (emoji){
+            return (
+                <div>
+                    <p> CPI Emoji: {emoji}</p>
+                </div>
+            )
+        }
+    }
   return next(card);
 };
+
+const renderEmoji = (textBlock) => {
+
+};
+
+const emojiCard = (emojiResponse) => {
+    let emojiRender;
+    if(emojiResponse.isEmoji){
+        emojiRender = (
+            <div style={{'width': '60px', 'height': '60px', 'backgroundColor': 'white'}}>
+                <img src={emojiResponse.emoji} alt={emojiResponse.cmd} style={{'width': '100%', 'height': '100%'}}></img>
+            </div>
+        )
+    }
+    else {
+        emojiRender = null;
+    }
+    return emojiRender;
+};
+
+const getEmoji = (cmd) => {
+    const commandEmojiMap = {
+        '(like)': like,
+        '(hi)': hi,
+        '(devil)': devil,
+        '(xd)': grinning,
+        '(monkey)': monkey,
+        '(sad)': sad,
+        '(smile)': smile,
+        '(tongueout)': tongue_out
+    }
+    return ( {
+        isEmoji: !!commandEmojiMap[cmd],
+        cmd,
+        emoji: commandEmojiMap[cmd]
+    });
+}
 
 const activityMiddleware = () => next => (...setupArgs) => {
     const render = next(...setupArgs);
@@ -63,11 +164,14 @@ const activityMiddleware = () => next => (...setupArgs) => {
                 if(element.props.activity.attachments[0].contentType === 'application/vnd.microsoft.card.adaptive'){
                     let attachment = element.props.activity.attachments[0]
                     console.log('attachment -> ', attachment);
-                    if(attachment.content.cpi){
-                        attachment.content.body[1].style = {
-                            color: 'red'
-                        };
-                        console.log('updated -> ', attachment);
+                    if(!attachment.content.cpi){
+                        if (attachment.content.body.length > 0){
+                            attachment.content.body[1].style = {
+                                color: 'red'
+                            };
+                            console.log('updated -> ', attachment);
+                        }
+
                     }
 
                 }
