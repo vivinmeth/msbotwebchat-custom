@@ -16,6 +16,12 @@ import PlainWebChat from './PlainWebChat';
 
 import * as AdaptiveCards from 'adaptivecards';
 
+window.CPI = {
+    RENDERER_ENABLED: true,
+    EMOJI_RENDERER: false,
+    CPI_SHOW_OFF: false,
+}
+
 export let currentCard;
 
 let {useCreateActivityRenderer, useRenderAttachment, useAdaptiveCardsPackage } = hooks;
@@ -57,7 +63,7 @@ export default (props) => {
             attachmentMiddleware={attachmentMiddleware}
             styleOptions = {styleOptionsConfig}
             adaptiveCardsHostConfig={adaptiveCardsHostConfig}
-            userID="YOUR_USER_ID"
+            userID="vivinmeth@emplay.vivinmeth.com"
         />
         // <React.Fragment>
         //     <h1>Web Chat with plain UI</h1>
@@ -73,6 +79,9 @@ export default (props) => {
 
 const attachmentMiddleware = () => next => card => {
     console.log('attachmentMiddleware ->', card);
+    if (!window.CPI.RENDERER_ENABLED || !window.CPI.EMOJI_RENDERER){
+        return (next(card))
+    }
     if(card.attachment.contentType === 'application/vnd.microsoft.card.adaptive'){
         if(card.attachment.content.cpi){
             // card.attachment.content.body[1].style = {
@@ -99,6 +108,9 @@ const attachmentMiddleware = () => next => card => {
 
 
         }
+
+
+
 
     }
     else if(card.attachment.contentType === 'text/markdown' || card.attachment.contentType === 'text/plain'){
@@ -259,9 +271,38 @@ const getEmoji = (cmd) => {
     });
 }
 
+const acSubmitButtonDisabler = (event) => {
+    event.persist();
+    const buttons = event.currentTarget.querySelectorAll('button');
+    console.log('acSubmitButtonDisabler -> ',event, event.target, typeof event.target, event.currentTarget, event.currentTarget.querySelectorAll('button'));
+    for (const button of buttons){
+        console.log(button, 'event adding!');
+        button.addEventListener('click', (event) => {
+            // event.persist();
+            // event.preventDefault();
+            console.log('buttonClicked? -> ', event)
+
+            //event.currentTarget.disabled = true;
+            event.currentTarget.style.display = "none";
+            event.currentTarget.style.opacity = 0.4;
+            event.currentTarget.style.borderColor = "black";
+            event.currentTarget.style.color = "black";
+            event.currentTarget.style.pointerEvent = "none";
+
+        });
+    }
+
+}
+
+
+
+
 const activityMiddleware = () => next => (...setupArgs) => {
     const render = next(...setupArgs);
     console.log('activity Render -> ', render, ...setupArgs);
+    if (!window.CPI.RENDERER_ENABLED){
+        return (render)
+    }
     if(render) {
         return  (...renderArgs) => {
             const element = render(...renderArgs);
@@ -271,15 +312,38 @@ const activityMiddleware = () => next => (...setupArgs) => {
                 if(element.props.activity.attachments[0].contentType === 'application/vnd.microsoft.card.adaptive'){
                     let attachment = element.props.activity.attachments[0]
                     console.log('attachment -> ', attachment);
-                    if(!attachment.content.cpi){
-                        if (attachment.content.body.length > 0){
-                            attachment.content.body[1].style = {
-                                color: 'red'
-                            };
-                            console.log('updated -> ', attachment);
-                        }
-
-                    }
+                    // if(!attachment.content.cpi){
+                    //     if (attachment.content.body.length > 0){
+                    //         attachment.content.body[1].style = {
+                    //             color: 'red'
+                    //         };
+                    //         console.log('updated -> ', attachment);
+                    //     }
+                    //
+                    // }
+                    const randId = Math.random().toString()
+                    return (
+                        <div
+                            className={card.activity.from.role === 'user' ? 'highlightedActivity--user' : 'highlightedActivity--bot'}
+                            onClick={acSubmitButtonDisabler}
+                            id={randId}
+                        >
+                            {
+                                window.CPI.CPI_SHOW_OFF ? (<p> CPI Render!</p>) : null
+                            }
+                            {element}
+                            {
+                                // setTimeout(() => {
+                                //     const elem = document.getElementById(randId)
+                                //     console.log(randId, elem);
+                                //     if (elem){
+                                //
+                                //         elem.style.backgroundColor = "grey";
+                                //     }
+                                // }, 15)
+                            }
+                        </div>
+                    )
 
                 }
             }

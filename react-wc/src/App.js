@@ -18,8 +18,7 @@ class App extends Component{
                     <div className="empwc__window">
                         <div className="empwc__toggle" id="empwc__toggle">
                             <div className="empwc__notification-dialog" id="empwc__notification-dialog">
-                                <p className="empwc__notification-dialog__text">Hello, can I help you in finding the right
-                                    video?</p>
+                                <p className="empwc__notification-dialog__text">Emplay Webchat v0.0.1-pre-alpha [REACT CPI Engine] </p>
                             </div>
                             <img id="msg-toggle" className="empwc__toggle__icon" alt="" onClick={launchChat}
                                  src="https://s3.amazonaws.com/emplay.botresources/webchat/empbts/common/img/Chatbot_opt3.svg"
@@ -28,7 +27,9 @@ class App extends Component{
                         <div className="empwc__chat__shelf empwc__card-shadow" id="empwc-shelf">
                             <div className="empwc__chat__header" id="empwc-header">
                                 <div className="empwc__chat__header__head">
-                                    <h3 id="userHead" className="empwc__chat__title" style={{'textAlign': 'left'}}>Hello, how may I help you?</h3>
+                                    <h3 id="userHead" className="empwc__chat__title" style={{'textAlign': 'left'}}>
+                                        Emplay Webchat [CPI Engine: <span style={{color: window.CPI.RENDERER_ENABLED ? "limegreen" : "red"}}>{window.CPI.RENDERER_ENABLED ? "On" : "Off"}</span>]
+                                    </h3>
                                     <div id="close" className="empwc__chat__close" onClick={hideChat}>
                                         <img
                                             src="https://s3.amazonaws.com/emplay.botresources/webchat/empbts/common/img/close.svg"
