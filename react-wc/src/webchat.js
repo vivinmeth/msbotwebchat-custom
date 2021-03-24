@@ -22,7 +22,8 @@ window.CPI = {
     CPI_SHOW_OFF: false,
     AC_BUTTON_DISHIDER: {
         mode: 'disable',
-        enabled: true
+        enabled: true,
+        FORM_VALIDATION: false
     },
     off: () => {
         window.CPI.RENDERER_ENABLED = false;
@@ -294,27 +295,59 @@ const getEmoji = (cmd) => {
 
 const acSubmitButtonDisabler = (event) => {
     event.persist();
+    let disableButtononStart = false;
     const buttons = event.currentTarget.querySelectorAll('button');
-    console.log('acSubmitButtonDisabler -> ',event, event.target, typeof event.target, event.currentTarget, event.currentTarget.querySelectorAll('button'));
+    let choices = [];
+    if (window.CPI.AC_BUTTON_DISHIDER.FORM_VALIDATION){
+        choices = event.currentTarget.querySelectorAll('input[type=radio]');
+        if (choices.length !== 0){
+            disableButtononStart = true;
+            for (const choice of choices){
+                if (choice.checked){
+                    disableButtononStart = false;
+                    break;
+                }
+            }
+        }
+    }
+    console.log('acSubmitButtonDisabler -> ',event, event.target, typeof event.target, event.currentTarget, buttons, choices, disableButtononStart);
     for (const button of buttons){
         console.log(button, 'event adding!');
+        if (window.CPI.AC_BUTTON_DISHIDER.FORM_VALIDATION){
+            if(disableButtononStart){
+                button.disabled = true;
+                button.style.opacity = 0.4;
+                button.style.borderColor = "black";
+                button.style.color = "black";
+                button.style.pointerEvent = "none";
+            }
+            else{
+                button.disabled = false;
+                button.style.opacity = "1";
+                button.style.borderColor = "var(--color-primary-light)";
+                button.style.color = "var(--color-primary-light)";
+                button.style.pointerEvent = "auto";
+            }
+        }
+
         button.addEventListener('click', (event) => {
             // event.persist();
-            // event.preventDefault();
+            event.preventDefault();
             console.log('buttonClicked? -> ', event)
 
             if(window.CPI.AC_BUTTON_DISHIDER.mode === 'disable'){
 
                 event.currentTarget.disabled = true;
+                event.currentTarget.style.opacity = 0.4;
+                event.currentTarget.style.borderColor = "black";
+                event.currentTarget.style.color = "black";
+                event.currentTarget.style.pointerEvent = "none";
             }
             else{
 
                 event.currentTarget.style.display = "none";
             }
-            event.currentTarget.style.opacity = 0.4;
-            event.currentTarget.style.borderColor = "black";
-            event.currentTarget.style.color = "black";
-            event.currentTarget.style.pointerEvent = "none";
+
 
         });
     }
@@ -351,7 +384,12 @@ const activityMiddleware = () => next => (...setupArgs) => {
                     return (
                         <div
                             className={card.activity.from.role === 'user' ? 'highlightedActivity--user' : 'highlightedActivity--bot'}
-                            onClick={acSubmitButtonDisabler}
+                            onClick={(event) => {
+                                if (window.CPI.AC_BUTTON_DISHIDER.enabled){
+
+                                    acSubmitButtonDisabler(event);
+                                }
+                            }}
                             id={randId}
                         >
                             {
@@ -359,30 +397,34 @@ const activityMiddleware = () => next => (...setupArgs) => {
                             }
                             {element}
                             {
-                                setTimeout(() => {
-                                    const elem = document.getElementById(randId)
-                                    console.log(randId, elem);
-                                    if (elem){
+                                (() => {
+                                    console.log('PostRenderingMWR -> ',this);
+                                    setTimeout(() => {
+                                        const elem = document.getElementById(randId)
+                                        console.log(randId, elem);
+                                        if (elem){
 
-                                        // elem.style.backgroundColor = "grey";
-                                        const qua = elem.querySelectorAll('p');
-                                        for (const ele of qua){
-                                            ele.style.color= "#037551";
-                                        }
-                                        const acSet = elem.querySelectorAll('.ac-actionSet');
-                                        for (const acs of acSet){
-                                            acs.style.flexDirection = "row";
-                                            acs.style.alignItems = "flex-start";
-                                            acs.style.flexWrap = "wrap";
-                                        }
-                                        const buttons = elem.querySelectorAll('button');
-                                        for (const button of buttons){
-                                            button.style.width = "125px";
-                                        }
-                                        elem.style.color = "red";
+                                            // elem.style.backgroundColor = "grey";
+                                            const qua = elem.querySelectorAll('p');
+                                            for (const ele of qua){
+                                                ele.style.color= "#037551";
+                                            }
+                                            const acSet = elem.querySelectorAll('.ac-actionSet');
+                                            for (const acs of acSet){
+                                                acs.style.flexDirection = "row";
+                                                acs.style.alignItems = "flex-start";
+                                                acs.style.flexWrap = "wrap";
+                                            }
+                                            const buttons = elem.querySelectorAll('button');
+                                            for (const button of buttons){
+                                                button.style.width = "125px";
+                                            }
+                                            elem.style.color = "red";
 
-                                    }
-                                }, 15)
+                                        }
+                                    }, 15)
+                                })()
+
                             }
                         </div>
                     )
