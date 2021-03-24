@@ -8,6 +8,22 @@ let msg;
 
 class App extends Component{
 
+    constructor() {
+        super();
+        this.state = {
+            CPI: {...window.CPI}
+        }
+
+        window.APP_STATE = {
+            thisArg: this,
+            state: this.state,
+            setState: (CPI) => {
+                this.setState( {
+                    CPI
+                })
+            }
+        }
+    }
 
     render() {
         return (

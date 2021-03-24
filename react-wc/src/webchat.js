@@ -17,9 +17,30 @@ import PlainWebChat from './PlainWebChat';
 import * as AdaptiveCards from 'adaptivecards';
 
 window.CPI = {
-    RENDERER_ENABLED: true,
+    RENDERER_ENABLED: false,
     EMOJI_RENDERER: false,
     CPI_SHOW_OFF: false,
+    AC_BUTTON_DISHIDER: {
+        mode: 'disable',
+        enabled: true
+    },
+    off: () => {
+        window.CPI.RENDERER_ENABLED = false;
+        window.APP_STATE.setState({CPI: window.CPI});
+    },
+    on: () => {
+        window.CPI.RENDERER_ENABLED = true;
+        window.APP_STATE.setState({CPI: window.CPI});
+    },
+    emojiOff: () => {
+        window.CPI.EMOJI_RENDERER = false;
+        window.APP_STATE.setState({CPI: window.CPI});
+    },
+    emojiOn: () => {
+        window.CPI.RENDERER_ENABLED = true;
+        window.APP_STATE.setState({CPI: window.CPI});
+    },
+
 }
 
 export let currentCard;
@@ -69,7 +90,7 @@ export default (props) => {
         //     <h1>Web Chat with plain UI</h1>
         //     <hr />
         //     {!!directLine && (
-        //         <Components.Composer directLine={directLine}>
+        //         <Components.Composer directLine={directLine} userID="vivinmeth@emplay.vivinmeth.com">
         //             <PlainWebChat />
         //         </Components.Composer>
         //     )}
@@ -282,8 +303,14 @@ const acSubmitButtonDisabler = (event) => {
             // event.preventDefault();
             console.log('buttonClicked? -> ', event)
 
-            //event.currentTarget.disabled = true;
-            event.currentTarget.style.display = "none";
+            if(window.CPI.AC_BUTTON_DISHIDER.mode === 'disable'){
+
+                event.currentTarget.disabled = true;
+            }
+            else{
+
+                event.currentTarget.style.display = "none";
+            }
             event.currentTarget.style.opacity = 0.4;
             event.currentTarget.style.borderColor = "black";
             event.currentTarget.style.color = "black";
@@ -291,7 +318,6 @@ const acSubmitButtonDisabler = (event) => {
 
         });
     }
-
 }
 
 
@@ -333,14 +359,30 @@ const activityMiddleware = () => next => (...setupArgs) => {
                             }
                             {element}
                             {
-                                // setTimeout(() => {
-                                //     const elem = document.getElementById(randId)
-                                //     console.log(randId, elem);
-                                //     if (elem){
-                                //
-                                //         elem.style.backgroundColor = "grey";
-                                //     }
-                                // }, 15)
+                                setTimeout(() => {
+                                    const elem = document.getElementById(randId)
+                                    console.log(randId, elem);
+                                    if (elem){
+
+                                        // elem.style.backgroundColor = "grey";
+                                        const qua = elem.querySelectorAll('p');
+                                        for (const ele of qua){
+                                            ele.style.color= "#037551";
+                                        }
+                                        const acSet = elem.querySelectorAll('.ac-actionSet');
+                                        for (const acs of acSet){
+                                            acs.style.flexDirection = "row";
+                                            acs.style.alignItems = "flex-start";
+                                            acs.style.flexWrap = "wrap";
+                                        }
+                                        const buttons = elem.querySelectorAll('button');
+                                        for (const button of buttons){
+                                            button.style.width = "125px";
+                                        }
+                                        elem.style.color = "red";
+
+                                    }
+                                }, 15)
                             }
                         </div>
                     )
