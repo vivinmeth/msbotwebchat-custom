@@ -77,6 +77,9 @@ export class WebchatRender extends Component{
 
 export default (props) => {
     const directLine = useMemo(() => createDirectLine({ token: 'nEBUdM8Zvc0.Irr-k3_gn7aR4mm7oWddqFluX__z4Rvars2lb8TRa9U' }), []);
+    directLine.connectionStatus$.subscribe(status => {
+        console.log('Directline -> Connnection Status:', status, directLine);
+    })
     return (
         <ReactWebChat
             id="webchat"
