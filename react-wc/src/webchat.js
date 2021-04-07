@@ -298,6 +298,7 @@ const getEmoji = (cmd) => {
 
 const acMedia_to_html5_video = (cardId, acPayload) => {
     const srcs = acPayload.body[0].sources;
+    const poster = acPayload.body[0].poster;
     const elem = document.getElementById(cardId);
     console.log("acMedia-to-html5-video -> got this card ", cardId, elem);
     if (elem){
@@ -313,7 +314,8 @@ const acMedia_to_html5_video = (cardId, acPayload) => {
                 const html5Video = document.createElement('video');
                 html5Video.setAttribute('webkit-playsinline', 'true');
                 html5Video.setAttribute('playsinline', 'true');
-                html5Video.autoplay = false;
+                html5Video.autoplay = true;
+                html5Video.poster = poster
                 html5Video.controls = true;
                 html5Video.preload = "none";
                 html5Video.style.width = "100%";
