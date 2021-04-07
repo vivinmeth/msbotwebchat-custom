@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import './assets/empwc.min.css';
 import './App.css';
 import Webchat, {WebchatRender} from "./webchat";
 
@@ -43,7 +44,7 @@ class App extends Component{
                         <div className="empwc__chat__shelf empwc__card-shadow" id="empwc-shelf">
                             <div className="empwc__chat__header" id="empwc-header">
                                 <div className="empwc__chat__header__head">
-                                    <h3 id="userHead" className="empwc__chat__title" style={{'textAlign': 'left'}}>
+                                    <h3 id="userHead" className="empwc__chat__title" style={{'textAlign': 'left', 'fontSize': '1rem'}}>
                                         Emplay Webchat [CPI Engine: <span style={{color: window.CPI.RENDERER_ENABLED ? "limegreen" : "red"}}>{window.CPI.RENDERER_ENABLED ? "On" : "Off"}</span>]
                                     </h3>
                                     <div id="close" className="empwc__chat__close" onClick={hideChat}>

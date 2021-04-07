@@ -68,7 +68,7 @@ export class WebchatRender extends Component{
     render() {
         return (
             <div>
-                <h4>Webchat Renderer</h4>
+                <h4>React Webchat - BotDesigner Renderer: <span style={{'color': 'red'}}>off</span></h4>
                 {this.state.currentCard}
             </div>
         )
@@ -296,6 +296,40 @@ const getEmoji = (cmd) => {
     });
 }
 
+const acMedia_to_html5_video = (cardId, acPayload) => {
+    const srcs = acPayload.body[0].sources;
+    const elem = document.getElementById(cardId);
+    console.log("acMedia-to-html5-video -> got this card ", cardId, elem);
+    if (elem){
+        const acMediaVideo = elem.querySelector('.ac-media#video');
+        if (acMediaVideo){
+            const acPoster = acMediaVideo.querySelector('.ac-media-poster');
+            if (acPoster) {
+                acPoster.remove()
+            }
+            const videoCheck = acMediaVideo.querySelectorAll('video');
+            if (videoCheck.length === 0){
+                console.log("acMedia-to-html5-video -> Converting ACMedia Videos to HTML5 videos");
+                const html5Video = document.createElement('video');
+                html5Video.setAttribute('webkit-playsinline', 'true');
+                html5Video.setAttribute('playsinline', 'true');
+                html5Video.autoplay = false;
+                html5Video.controls = true;
+                html5Video.preload = "none";
+                html5Video.style.width = "100%";
+                srcs.map((src, index) => {
+                    const source = document.createElement('source');
+                    source.src = src.url;
+                    source.type = src.mimeType;
+                    html5Video.appendChild(source);
+                });
+                acMediaVideo.appendChild(html5Video);
+            }
+        }
+    }
+
+}
+
 const acSubmitButtonDisabler = (event) => {
     event.persist();
     let disableButtononStart = false;
@@ -356,7 +390,46 @@ const acSubmitButtonDisabler = (event) => {
     }
 }
 
+const testCPI = (cardId) => {
+    const elem = document.getElementById(cardId)
+    console.log(cardId, elem);
+    if (elem){
 
+        // elem.style.backgroundColor = "grey";
+        const qua = elem.querySelectorAll('p');
+        for (const ele of qua){
+            ele.style.color= "#037551";
+        }
+        const acSet = elem.querySelectorAll('.ac-actionSet');
+        for (const acs of acSet){
+            acs.style.flexDirection = "row";
+            acs.style.alignItems = "flex-start";
+            acs.style.flexWrap = "wrap";
+        }
+        const buttons = elem.querySelectorAll('button');
+        for (const button of buttons){
+            button.style.width = "125px";
+        }
+        elem.style.color = "red";
+
+    }
+}
+
+/* CPI Engine config sample
+"CPI": {
+        "enabled": true,
+        "advanced": false,
+        "cardType": "AdaptiveCard" / "CustomCard" / and many more...,
+        "middlewares": ["preRenderer","postRenderer"],
+        "template": "",
+        "S.M.A.R.T": true
+    }
+ */
+
+const templates = {
+    "testCPI": testCPI,
+    "acMedia-to-html5-video": acMedia_to_html5_video
+}
 
 
 const activityMiddleware = () => next => (...setupArgs) => {
@@ -374,63 +447,43 @@ const activityMiddleware = () => next => (...setupArgs) => {
                 if(element.props.activity.attachments[0].contentType === 'application/vnd.microsoft.card.adaptive'){
                     let attachment = element.props.activity.attachments[0]
                     console.log('attachment -> ', attachment);
-                    // if(!attachment.content.cpi){
-                    //     if (attachment.content.body.length > 0){
-                    //         attachment.content.body[1].style = {
-                    //             color: 'red'
-                    //         };
-                    //         console.log('updated -> ', attachment);
-                    //     }
-                    //
-                    // }
-                    const randId = Math.random().toString()
-                    return (
-                        <div
-                            className={card.activity.from.role === 'user' ? 'highlightedActivity--user' : 'highlightedActivity--bot'}
-                            onClick={(event) => {
-                                if (window.CPI.AC_BUTTON_DISHIDER.enabled){
+                    if(attachment.content.CPI){
+                        const CPI = attachment.content.CPI;
+                        if (CPI.enabled) {
+                            const randId = Math.random().toString()
+                            return (
+                                <div
+                                    className={card.activity.from.role === 'user' ? 'highlightedActivity--user' : 'highlightedActivity--bot'}
+                                    onClick={(event) => {
+                                        if (window.CPI.AC_BUTTON_DISHIDER.enabled){
 
-                                    acSubmitButtonDisabler(event);
-                                }
-                            }}
-                            id={randId}
-                        >
-                            {
-                                window.CPI.CPI_SHOW_OFF ? (<p> CPI Render!</p>) : null
-                            }
-                            {element}
-                            {
-                                (() => {
-                                    console.log('PostRenderingMWR -> ',this);
-                                    setTimeout(() => {
-                                        const elem = document.getElementById(randId)
-                                        console.log(randId, elem);
-                                        if (elem){
-
-                                            // elem.style.backgroundColor = "grey";
-                                            const qua = elem.querySelectorAll('p');
-                                            for (const ele of qua){
-                                                ele.style.color= "#037551";
-                                            }
-                                            const acSet = elem.querySelectorAll('.ac-actionSet');
-                                            for (const acs of acSet){
-                                                acs.style.flexDirection = "row";
-                                                acs.style.alignItems = "flex-start";
-                                                acs.style.flexWrap = "wrap";
-                                            }
-                                            const buttons = elem.querySelectorAll('button');
-                                            for (const button of buttons){
-                                                button.style.width = "125px";
-                                            }
-                                            elem.style.color = "red";
-
+                                            acSubmitButtonDisabler(event);
                                         }
-                                    }, 15)
-                                })()
+                                    }}
+                                    id={randId}
+                                >
+                                    {
+                                        window.CPI.CPI_SHOW_OFF ? (<p> CPI Render!</p>) : null
+                                    }
+                                    {element}
+                                    {
+                                        (() => {
+                                            console.log('PostRenderingMWR -> ',this);
+                                            setTimeout(() => {
+                                                if (CPI.template){
+                                                    templates[CPI.template].apply(null, [randId, attachment.content])
+                                                }
+                                            }, 15)
+                                        })()
 
-                            }
-                        </div>
-                    )
+                                    }
+                                </div>
+                            )
+                        }
+
+                    }
+
+
 
                 }
             }
