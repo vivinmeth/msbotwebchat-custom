@@ -1,7 +1,5 @@
 import React, { useMemo, Component } from 'react';
 import ReactWebChat, { createDirectLine, createStore, hooks} from 'botframework-webchat';
-import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
-import {Components} from 'botframework-webchat-component';
 import like from './assets/img/emojis/like-100px.gif';
 import devil from './assets/img/emojis/devil-100px.gif';
 import grinning from './assets/img/emojis/grinning-100px.gif';
@@ -14,7 +12,6 @@ import tongue_out from './assets/img/emojis/tongue-out-100px.gif';
 
 import PlainWebChat from './PlainWebChat';
 
-import * as AdaptiveCards from 'adaptivecards';
 
 window.CPI = {
     RENDERER_ENABLED: false,
@@ -38,7 +35,7 @@ window.CPI = {
         window.APP_STATE.setState({CPI: window.CPI});
     },
     emojiOn: () => {
-        window.CPI.RENDERER_ENABLED = true;
+        window.CPI.EMOJI_RENDERER = true;
         window.APP_STATE.setState({CPI: window.CPI});
     },
 
@@ -623,8 +620,8 @@ const adaptiveCardsHostConfig = {
                     }
                 },
                 "accent": {
-                    "default": "#E60A79",
-                    "subtle": "#E60A79",
+                    "default": "var(--color-primary)",
+                    "subtle": "var(--color-primary)",
                     "highlightColors": {
                         "default": "#22000000",
                         "subtle": "#11000000"
@@ -684,7 +681,7 @@ const adaptiveCardsHostConfig = {
                     }
                 },
                 "accent": {
-                    "default": "#E60A79",
+                    "default": "var(--color-primary)",
                     "subtle": "#882E89FC",
                     "highlightColors": {
                         "default": "#22000000",
