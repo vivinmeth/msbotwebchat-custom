@@ -9,6 +9,12 @@ import sad from './assets/img/emojis/sad-100px.gif';
 import smile from './assets/img/emojis/smile-special.gif';
 import tongue_out from './assets/img/emojis/tongue-out-100px.gif';
 
+// import  * as natours from './assets/img/natours/*.jpg';
+
+import videoMP4 from './assets/img/natours/video.mp4';
+import videoWEBM from './assets/img/natours/video.webm';
+import nat8 from './assets/img/natours/nat-8.jpg';
+import nat9 from './assets/img/natours/nat-9.jpg'
 
 import PlainWebChat from './PlainWebChat';
 
@@ -47,8 +53,14 @@ let {useCreateActivityRenderer, useRenderAttachment, useAdaptiveCardsPackage } =
 
 
 const store = createStore({}, ({ dispatch }) => next => action => {
+    console.log('Store -> Action:', action, action.type)
     if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
-        dispatch({type: 'WEB_CHAT/SEND_MESSAGE', payload: {text: 'sample:backchannel'}});
+        dispatch({
+            type: 'WEB_CHAT/SEND_EVENT',
+            payload: {
+                name: 'webchat/join'
+            }
+        });
     } else if (action.type === 'DIRECT_LINE/INCOMING_ACTIVITY') {
         const {activity} = action.payload;
 
@@ -73,19 +85,21 @@ export class WebchatRender extends Component{
 }
 
 export default (props) => {
-    const directLine = useMemo(() => createDirectLine({ token: 'nEBUdM8Zvc0.Irr-k3_gn7aR4mm7oWddqFluX__z4Rvars2lb8TRa9U' }), []);
+    const directLine = useMemo(() => createDirectLine({ token: 'TwbA_KoJmQU.3-BAeeMaH_O2FvFnZ6Ez2Phc6VilHNoRvGslZ3mXmiU' }), []);
     directLine.connectionStatus$.subscribe(status => {
         console.log('Directline -> Connnection Status:', status, directLine);
     })
     return (
         <ReactWebChat
             id="webchat"
+            store={store}
             directLine={directLine}
             activityMiddleware={activityMiddleware}
             attachmentMiddleware={attachmentMiddleware}
             styleOptions = {styleOptionsConfig}
             adaptiveCardsHostConfig={adaptiveCardsHostConfig}
             userID="vivinmeth@emplay.vivinmeth.com"
+            userFullName = "vivinmeth"
         />
         // <React.Fragment>
         //     <h1>Web Chat with plain UI</h1>
@@ -414,6 +428,70 @@ const testCPI = (cardId) => {
     }
 }
 
+const creditsListCard = () => {
+    return (
+        <div>
+            <section className="section-stories" id="section-stories">
+                <div className="bg-video">
+                    <video className="bg-video__content" autoPlay loop>
+                        <source src={videoMP4} type="video/mp4" />
+                            <source src={videoWEBM} type="video/webm" />
+                                <p>Your browser is not supported!</p>
+                    </video>
+                </div>
+                {/*<div className="u-center-text u-margin-bottom-big">*/}
+                {/*    <h2 className="heading-secondary">*/}
+                {/*        We make people genuinely happy*/}
+                {/*    </h2>*/}
+                {/*</div>*/}
+                <div className="row">
+                    <div className="story">
+                        <figure className="story__shape">
+                            <img className="story__img" src={nat8} alt="Person on a tour" />
+                                <figcaption className="story__caption">Mary Smith</figcaption>
+                        </figure>
+                        {/*<div className="story__text">*/}
+                        {/*    <h3 className="heading-tertiary u-margin-bottom-small">*/}
+                        {/*        I had the best week ever with my family*/}
+                        {/*    </h3>*/}
+                        {/*    <p>*/}
+                        {/*        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab amet corporis eius esse*/}
+                        {/*        harum incidunt itaque iure maiores molestiae nulla omnis porro, qui quibusdam quo*/}
+                        {/*        reiciendis rem velit! Iure.*/}
+                        {/*    </p>*/}
+                        {/*</div>*/}
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="story">
+                        <figure className="story__shape">
+                            <img className="story__img" src={nat9} alt="Person on a tour" />
+                                <figcaption className="story__caption">Jack Wilson</figcaption>
+                        </figure>
+                        {/*<div className="story__text">*/}
+                        {/*    <h3 className="heading-tertiary u-margin-bottom-small">*/}
+                        {/*        My life is completely different now*/}
+                        {/*    </h3>*/}
+                        {/*    <p>*/}
+                        {/*        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab amet corporis eius esse*/}
+                        {/*        harum incidunt itaque iure maiores molestiae nulla omnis porro, qui quibusdam quo*/}
+                        {/*        reiciendis rem velit! Iure.*/}
+                        {/*    </p>*/}
+                        {/*</div>*/}
+                    </div>
+                </div>
+                {/*<div className="u-center-text u-margin-top-huge">*/}
+                {/*    <a href="#" className="button-text">Read all stories &rarr;</a>*/}
+                {/*</div>*/}
+            </section>
+        </div>
+    )
+}
+
+
+
+
+
 /* CPI Engine config sample
 "CPI": {
         "enabled": true,
@@ -428,6 +506,42 @@ const testCPI = (cardId) => {
 const templates = {
     "testCPI": testCPI,
     "acMedia-to-html5-video": acMedia_to_html5_video
+}
+
+const customTemplates = {
+    'credits-list': creditsListCard
+}
+
+const AdaptiveCardRenderer = (element, randId, attachment, CPI) => {
+    return (
+        <span>
+            {
+                window.CPI.CPI_SHOW_OFF ? (<p> CPI Render!</p>) : null
+            }
+            {element}
+            {
+                (() => {
+                    console.log('PostRenderingMWR -> ',this);
+                    setTimeout(() => {
+                        if (CPI.template){
+                            templates[CPI.template].apply(null, [randId, attachment.content])
+                        }
+                    }, 15)
+                })()
+
+            }
+        </span>
+    )
+}
+
+const customCardRenderer = (CPI) => {
+    return (
+        <span>
+            {
+                customTemplates[CPI.template].apply(null)
+            }
+        </span>
+    )
 }
 
 
@@ -462,20 +576,9 @@ const activityMiddleware = () => next => (...setupArgs) => {
                                     id={randId}
                                 >
                                     {
-                                        window.CPI.CPI_SHOW_OFF ? (<p> CPI Render!</p>) : null
+                                        CPI.cardType === 'AdaptiveCard' ? AdaptiveCardRenderer(element, randId, attachment, CPI) : customCardRenderer(CPI)
                                     }
-                                    {element}
-                                    {
-                                        (() => {
-                                            console.log('PostRenderingMWR -> ',this);
-                                            setTimeout(() => {
-                                                if (CPI.template){
-                                                    templates[CPI.template].apply(null, [randId, attachment.content])
-                                                }
-                                            }, 15)
-                                        })()
 
-                                    }
                                 </div>
                             )
                         }

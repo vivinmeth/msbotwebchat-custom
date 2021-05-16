@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './assets/empwc.min.css';
 import './App.css';
+import './assets/credits.css';
 import Webchat, {WebchatRender} from "./webchat";
 
 let chat;
