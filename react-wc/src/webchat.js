@@ -77,7 +77,7 @@ export class WebchatRender extends Component{
     render() {
         return (
             <div>
-                <h4>React Webchat - BotDesigner Renderer: <span style={{'color': 'red'}}>off</span></h4>
+                <h4>EmplayWebchat - BotDesigner Renderer: <span style={{'color': 'red'}}>off</span></h4>
                 {this.state.currentCard}
             </div>
         )
