@@ -1,5 +1,7 @@
 import React, { useMemo, Component } from 'react';
 import ReactWebChat, { createDirectLine, createStore, hooks} from 'botframework-webchat';
+import Chart from 'chart.js/auto';
+
 import like from './assets/img/emojis/like-100px.gif';
 import devil from './assets/img/emojis/devil-100px.gif';
 import grinning from './assets/img/emojis/grinning-100px.gif';
@@ -548,6 +550,75 @@ const creditsListCard = () => {
     )
 }
 
+const createChart = (chartElem) => {
+    return new Chart(chartElem, {
+        type: 'bar',
+        data: {
+            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+let chartReff = [];
+
+const clearCharts = () => {
+  for (const chart of chartReff){
+      console.log('Destroying...', chart, chartReff);
+      chart.destroy();
+  }
+  chartReff = [];
+};
+
+const chartsDemoCard = () => {
+    clearCharts();
+    const randID = Math.random().toString().replaceAll('.', '');
+    const chart = <canvas id={'chart'+randID}></canvas>;
+    console.log('ChartsDemoCard -> rendering', randID, chart);
+    return (
+        <div>
+            {chart}
+            {
+                (() => {
+                    setTimeout(() => {
+                        clearCharts();
+                        chartReff.push(createChart(document.getElementById('chart'+randID)));
+                    }, 15)
+                })()
+
+            }
+        </div>
+    )
+
+};
+
 
 
 
@@ -570,7 +641,8 @@ const templates = {
 }
 
 const customTemplates = {
-    'credits-list': creditsListCard
+    'credits-list': creditsListCard,
+    'charts': chartsDemoCard
 }
 
 const AdaptiveCardRenderer = (element, randId, attachment, CPI) => {
