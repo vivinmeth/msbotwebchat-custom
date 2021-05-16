@@ -46,3 +46,8 @@
   border-right-width: 5px;
   margin-right: 8px;
 }
+
+.empwc #webchat .ac-adaptiveCard .ac-textBlock p {
+  /* max-height: 200px; */
+  overflow: visible;
+}

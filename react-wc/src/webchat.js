@@ -18,6 +18,23 @@ import nat9 from './assets/img/natours/nat-9.jpg'
 
 import PlainWebChat from './PlainWebChat';
 
+function getCSS(styles) {
+    let css = [];
+    for (let selector in styles) {
+        let style = selector + " {";
+
+        for (let prop in styles[selector]) {
+            style += prop + ":" + styles[selector][prop] + ";";
+        }
+
+        style += "}";
+
+        css.push(style);
+    }
+
+    return css.join("\n");
+}
+
 
 window.CPI = {
     RENDERER_ENABLED: false,
@@ -112,6 +129,19 @@ export default (props) => {
         // </React.Fragment>
         );
 };
+
+const PostRenderer = {
+    Style: null
+}
+
+const PostRendererStyleEngine = () => {
+    const postRendererStyle = document.createElement('style');
+    postRendererStyle.innerHTML = '/* This is PostRenderer Styles - DO NOT MODIFY */';
+    document.head.appendChild(postRendererStyle);
+    PostRenderer.Style = postRendererStyle;
+}
+
+PostRendererStyleEngine();
 
 const attachmentMiddleware = () => next => card => {
     console.log('attachmentMiddleware ->', card);
@@ -428,6 +458,36 @@ const testCPI = (cardId) => {
     }
 }
 
+const applyImportantAll = (style) => {
+    const output = {}
+    for (const prop in style){
+        output[prop] = style[prop] + " !important";
+    }
+    return output;
+}
+
+const acStylist = (cardId, cardPayload) => {
+    const elem = document.getElementById(cardId)
+    console.log(cardId, elem);
+    if (elem){
+        for (const block of cardPayload.body){
+            if (block.hasOwnProperty("CPIStyles")){
+                let CPIStyles = block.CPIStyles;
+                CPIStyles = applyImportantAll(CPIStyles);
+                const ID = block.id;
+                if (ID){
+                    const stylesCSS = `{"#${cardId} #${ID}":${JSON.stringify(CPIStyles)}}`;
+                    console.log('acStylist -> PostRendering...', cardId, cardPayload, block, stylesCSS, ID, PostRenderer.Style);
+                    // elem.querySelector(`#${ID}`).style += JSON.stringify(CPIStyles).slice(1, JSON.stringify(CPIStyles).length);
+                    PostRenderer.Style.innerHTML += getCSS(JSON.parse(stylesCSS));
+                }
+            }
+        }
+
+
+    }
+}
+
 const creditsListCard = () => {
     return (
         <div>
@@ -504,8 +564,9 @@ const creditsListCard = () => {
  */
 
 const templates = {
-    "testCPI": testCPI,
-    "acMedia-to-html5-video": acMedia_to_html5_video
+    testCPI,
+    acMedia_to_html5_video,
+    acStylist
 }
 
 const customTemplates = {
@@ -563,7 +624,7 @@ const activityMiddleware = () => next => (...setupArgs) => {
                     if(attachment.content.CPI){
                         const CPI = attachment.content.CPI;
                         if (CPI.enabled) {
-                            const randId = Math.random().toString()
+                            const randId = 'ac'+Math.random().toString().replaceAll('.','')
                             return (
                                 <div
                                     className={card.activity.from.role === 'user' ? 'highlightedActivity--user' : 'highlightedActivity--bot'}
