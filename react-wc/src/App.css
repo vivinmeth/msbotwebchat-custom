@@ -32,22 +32,40 @@
   }
 }
 
-.highlightedActivity--bot {
-  border-left-color: Red;
-  border-left-style: solid;
-  border-left-width: 5px;
-  margin-left: 8px;
-}
+/*.highlightedActivity--bot {*/
+/*  border-left-color: Red;*/
+/*  border-left-style: solid;*/
+/*  border-left-width: 5px;*/
+/*  margin-left: 8px;*/
+/*}*/
 
 
-.highlightedActivity--user {
-  border-right-color: Green;
-  border-right-style: solid;
-  border-right-width: 5px;
-  margin-right: 8px;
-}
+/*.highlightedActivity--user {*/
+/*  border-right-color: Green;*/
+/*  border-right-style: solid;*/
+/*  border-right-width: 5px;*/
+/*  margin-right: 8px;*/
+/*}*/
 
 .empwc #webchat .ac-adaptiveCard .ac-textBlock p {
   /* max-height: 200px; */
   overflow: visible;
+}
+
+.webchat--css-yzlte-111jw2m{
+  color: transparent;
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.webchat--css-yzlte-70d0wd{
+  color: #767676;
+  font-family: 'Calibri','Helvetica Neue','Arial','sans-serif';
+  font-size: 1.2rem;
+  display: flex;
+  margin-left: 10px;
 }

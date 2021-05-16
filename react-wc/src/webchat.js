@@ -145,6 +145,42 @@ const PostRendererStyleEngine = () => {
 
 PostRendererStyleEngine();
 
+const WrapperAsWCCard = (card, time) => {
+    const date = new Date(time);
+    return (
+        <div className="highlightedActivity--bot" id="ac07814895393450094">
+            <span>
+                <div aria-roledescription="activity" className="webchat__stacked-layout webchat--css-yzlte-rctxl4 webchat--css-yzlte-a2o5nv webchat__stacked-layout--extra-trailing webchat__stacked-layout--no-message webchat__stacked-layout--top-callout" role="group">
+                    <div className="webchat__stacked-layout__main">
+                    <div className="webchat__stacked-layout__avatar-gutter"></div>
+                        <div className="webchat__stacked-layout__content">
+                            <div aria-roledescription="attachment" className="webchat__stacked-layout__attachment-row webchat__stacked-layout__attachment-row--first" role="group">
+                                <div className="webchat--css-yzlte-111jw2m">Bot attached:</div>
+                                <div className="webchat__bubble webchat__bubble--nub-on-top webchat--css-yzlte-1qo0vqe webchat--css-yzlte-ca8wfs webchat__stacked-layout__attachment">
+                                    <div className="webchat__bubble__nub-pad"></div>
+                                        <div className="webchat__bubble__content">
+                                            {card}
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                        <div className="webchat__stacked-layout__alignment-pad"></div>
+                    </div>
+                    <div className="webchat__stacked-layout__status">
+                        <div className="webchat__stacked-layout__avatar-gutter"></div>
+                        <div className="webchat__stacked-layout__nub-pad"></div>
+                        <span className="webchat--css-yzlte-70d0wd">
+                            <div className="webchat--css-yzlte-111jw2m">Sent at {date.toDateString()} at {date.getHours()}:{date.getMinutes()} PM</div>
+                            <span aria-hidden="true">{date.toDateString()} at {date.getHours()}:{date.getMinutes()} PM</span>
+                        </span>
+                        <div className="webchat__stacked-layout__alignment-pad"></div>
+                    </div>
+                </div>
+            </span>
+        </div>
+    )
+}
+
 const attachmentMiddleware = () => next => card => {
     console.log('attachmentMiddleware ->', card);
     if (!window.CPI.RENDERER_ENABLED || !window.CPI.EMOJI_RENDERER){
@@ -490,8 +526,8 @@ const acStylist = (cardId, cardPayload) => {
     }
 }
 
-const creditsListCard = () => {
-    return (
+const creditsListCard = (timestamp) => {
+    return ( WrapperAsWCCard(
         <div>
             <section className="section-stories" id="section-stories">
                 <div className="bg-video">
@@ -547,6 +583,8 @@ const creditsListCard = () => {
                 {/*</div>*/}
             </section>
         </div>
+        , timestamp
+        )
     )
 }
 
@@ -597,12 +635,12 @@ const clearCharts = () => {
   chartReff = [];
 };
 
-const chartsDemoCard = () => {
+const chartsDemoCard = (timestamp) => {
     clearCharts();
     const randID = Math.random().toString().replaceAll('.', '');
     const chart = <canvas id={'chart'+randID}></canvas>;
     console.log('ChartsDemoCard -> rendering', randID, chart);
-    return (
+    return ( WrapperAsWCCard(
         <div>
             {chart}
             {
@@ -615,6 +653,8 @@ const chartsDemoCard = () => {
 
             }
         </div>
+        , timestamp
+        )
     )
 
 };
@@ -667,11 +707,11 @@ const AdaptiveCardRenderer = (element, randId, attachment, CPI) => {
     )
 }
 
-const customCardRenderer = (CPI) => {
+const customCardRenderer = (CPI, timestamp) => {
     return (
         <span>
             {
-                customTemplates[CPI.template].apply(null)
+                customTemplates[CPI.template].apply(null, [timestamp])
             }
         </span>
     )
@@ -709,7 +749,7 @@ const activityMiddleware = () => next => (...setupArgs) => {
                                     id={randId}
                                 >
                                     {
-                                        CPI.cardType === 'AdaptiveCard' ? AdaptiveCardRenderer(element, randId, attachment, CPI) : customCardRenderer(CPI)
+                                        CPI.cardType === 'AdaptiveCard' ? AdaptiveCardRenderer(element, randId, attachment, CPI) : customCardRenderer(CPI, element.props.activity.timestamp)
                                     }
 
                                 </div>
