@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "projects": {
-    "empwc": "apps/empwc",
-    "empwc-e2e": "apps/empwc-e2e"
-  }
-}
